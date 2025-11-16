@@ -1,8 +1,8 @@
 fastapi
-uvicorn[standard]
+uvicorn
 pydantic
 numpy
 requests
 openai-whisper
-torch==2.5.1
-torchaudio==2.5.1
+torch==2.1.0
+torchaudio==2.1.0
