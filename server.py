@@ -1,17 +1,27 @@
-from fastapi import FastAPI, UploadFile
+from fastapi import FastAPI
+from pydantic import BaseModel
 import whisper
-import shutil
+import requests
+import tempfile
 import os
 
 app = FastAPI()
 model = whisper.load_model("base")
 
+class VideoURL(BaseModel):
+    url: str
+
 @app.post("/transcribe")
-async def transcribe(file: UploadFile):
-    # save uploaded file temporarily
-    temp_path = f"temp_{file.filename}"
-    with open(temp_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
+async def transcribe(video: VideoURL):
+    # download video from URL
+    response = requests.get(video.url, stream=True)
+    if response.status_code != 200:
+        return {"error": "Failed to download video"}
+
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as temp_file:
+        for chunk in response.iter_content(chunk_size=8192):
+            temp_file.write(chunk)
+        temp_path = temp_file.name
 
     # run whisper transcription
     result = model.transcribe(temp_path)
@@ -24,7 +34,6 @@ async def transcribe(file: UploadFile):
             end = seg["end"]
             text = seg["text"].strip()
 
-            # convert to SRT time format
             def format_time(seconds: float):
                 h = int(seconds // 3600)
                 m = int((seconds % 3600) // 60)
@@ -36,16 +45,15 @@ async def transcribe(file: UploadFile):
             f.write(f"{format_time(start)} --> {format_time(end)}\n")
             f.write(f"{text}\n\n")
 
-    # cleanup uploaded video immediately
+    # cleanup video file
     os.remove(temp_path)
 
-    # read srt content into memory and delete the file
+    # read srt content
     with open(srt_path, "r", encoding="utf-8") as f:
         srt_content = f.read()
-    os.remove(srt_path)  # delete srt file after reading
+    os.remove(srt_path)
 
-    # return JSON with transcript and SRT content
     return {
-        "captions": result["text"],  # full transcript as plain text
-        "srt": srt_content            # .srt formatted captions
+        "captions": result["text"],
+        "srt": srt_content
     }
