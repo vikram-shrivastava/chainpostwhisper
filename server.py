@@ -6,30 +6,33 @@ import tempfile
 import os
 
 app = FastAPI()
-model = whisper.load_model("base")
+
+# Load the tiny model to fit under 512MB RAM
+model = whisper.load_model("tiny")
 
 class VideoURL(BaseModel):
     url: str
 
 @app.post("/transcribe")
 async def transcribe(video: VideoURL):
-    # download video from URL
+    # Download video in streaming mode to save memory
     response = requests.get(video.url, stream=True)
     if response.status_code != 200:
         return {"error": "Failed to download video"}
 
+    # Save video to a temporary file
     with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as temp_file:
         for chunk in response.iter_content(chunk_size=8192):
             temp_file.write(chunk)
         temp_path = temp_file.name
 
-    # run whisper transcription
+    # Transcribe with tiny model
     result = model.transcribe(temp_path)
 
-    # generate .srt file
+    # Generate .srt file
     srt_path = temp_path.replace(".mp4", ".srt")
     with open(srt_path, "w", encoding="utf-8") as f:
-        for i, seg in enumerate(result["segments"], start=1):
+        for i, seg in enumerate(result.get("segments", []), start=1):
             start = seg["start"]
             end = seg["end"]
             text = seg["text"].strip()
@@ -45,15 +48,15 @@ async def transcribe(video: VideoURL):
             f.write(f"{format_time(start)} --> {format_time(end)}\n")
             f.write(f"{text}\n\n")
 
-    # cleanup video file
+    # Cleanup video file
     os.remove(temp_path)
 
-    # read srt content
+    # Read SRT content
     with open(srt_path, "r", encoding="utf-8") as f:
         srt_content = f.read()
     os.remove(srt_path)
 
     return {
-        "captions": result["text"],
+        "captions": result.get("text", ""),
         "srt": srt_content
     }
