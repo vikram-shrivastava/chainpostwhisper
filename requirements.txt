@@ -1,7 +1,7 @@
 fastapi
 uvicorn
 pydantic
-numpy
+numpy<2
 requests
 openai-whisper
 torch==2.1.0
