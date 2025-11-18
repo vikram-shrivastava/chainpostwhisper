@@ -11,7 +11,7 @@ app = FastAPI()
 # Load tiny model (fits under 512MB RAM)
 model = whisper.load_model("tiny")
 
-NEXTJS_CALLBACK_URL = "http://localhost:3000/api/caption-result"  # Next.js callback
+NEXTJS_CALLBACK_URL = "https://chainpostapp.vercel.app/api/caption-result"  # Next.js callback
 
 class VideoURL(BaseModel):
     url: str
