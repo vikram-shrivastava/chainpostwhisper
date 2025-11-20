@@ -4,14 +4,13 @@ import whisper
 import requests
 import tempfile
 import os
-# use requests instead of httpx to avoid adding a new dependency
 
 app = FastAPI()
 
 # Load tiny model (fits under 512MB RAM)
 model = whisper.load_model("tiny")
 
-NEXTJS_CALLBACK_URL = "https://chainpostapp.vercel.app/api/caption-result"  # Next.js callback
+NEXTJS_CALLBACK_URL ='https://nexuscreate.vikramshrivastav.app/api/caption-result'
 
 class VideoURL(BaseModel):
     url: str
