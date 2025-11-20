@@ -26,7 +26,7 @@ def format_time(seconds: float):
     ms = int((seconds % 1) * 1000)
     return f"{h:02}:{m:02}:{s:02},{ms:03}"
 
-def process_video(video_url: str, public_id: str, original_size: int, user_id: str):
+def process_video(video_url: str, public_id: str, original_size: int, user_id: str,project_id:str,platform:str):
     # Download video
     response = requests.get(video_url, stream=True)
     if response.status_code != 200:
@@ -63,7 +63,9 @@ def process_video(video_url: str, public_id: str, original_size: int, user_id: s
         "srt": srt_content,
         "PublicId": public_id,
         "OriginalSize": original_size,
-        "userId": user_id
+        "userId": user_id,
+        "projectId":project_id,
+        "platform":platform
     }
 
     if not NEXTJS_CALLBACK_URL:
@@ -86,7 +88,7 @@ async def qstash_webhook(request: Request):
     print("🔥 Received QStash message:", body)
 
     # Validate keys
-    for key in ["CloudinaryURL", "PublicId", "OriginalSize", "userId"]:
+    for key in ["CloudinaryURL", "PublicId", "OriginalSize", "userId","projectId","platform"]:
         if key not in body:
             return {"status": "error", "message": f"{key} missing in payload"}
 
@@ -95,7 +97,9 @@ async def qstash_webhook(request: Request):
         video_url=body["CloudinaryURL"],
         public_id=body["PublicId"],
         original_size=body["OriginalSize"],
-        user_id=body["userId"]
+        user_id=body["userId"],
+        project_id=body["projectId"],
+        platform=body["platform"]
     )
 
     return {"status": "ok", "message": "Job processed"}
