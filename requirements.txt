@@ -3,6 +3,11 @@ uvicorn
 pydantic
 numpy<2
 requests
-torch==2.1.0
-torchaudio==2.1.0
-faster_whisper
+
+# CPU-safe PyTorch builds
+torch==2.1.0+cpu
+torchaudio==2.1.0+cpu
+--extra-index-url https://download.pytorch.org/whl/cpu
+
+faster-whisper==0.10.0
+PYTHON_VERSION==3.10.13
