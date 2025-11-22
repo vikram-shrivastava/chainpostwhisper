@@ -9,7 +9,7 @@ from faster_whisper import WhisperModel  # type: ignore # Use faster-whisper for
 app = FastAPI()
 
 # Load tiny model once at startup
-model = WhisperModel("tiny")
+model = WhisperModel("tiny", device="cpu", compute_type="int8")
 
 NEXTJS_CALLBACK_URL = os.environ.get("NEXTJS_CALLBACK_URL")  # Example: https://your-nextjs-app/api/caption-result
 

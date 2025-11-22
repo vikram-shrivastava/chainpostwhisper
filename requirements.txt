@@ -1,12 +1,7 @@
 fastapi
 uvicorn
 pydantic
-numpy<2
 requests
-
-# CPU-safe PyTorch builds
-torch==2.1.0+cpu
-torchaudio==2.1.0+cpu
---extra-index-url https://download.pytorch.org/whl/cpu
-
-faster-whisper==0.10.0 --no-deps
+# numpy<2 is crucial because numpy 2.0 breaks many ML libraries right now
+numpy<2
+faster-whisper==0.10.0
