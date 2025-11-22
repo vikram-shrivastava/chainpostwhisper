@@ -14,7 +14,7 @@ WORKDIR /app
 COPY requirements.txt .
 
 # 5. Install Python libraries
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install -r requirements.txt
 
 # 6. Copy the rest of your code into the container
 COPY . .
